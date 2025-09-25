@@ -1,0 +1,89 @@
+ANALYSE DATA DRIFT - PROJET PRÊT À DÉPENSER
+==================================================
+Date: 2025-09-25 09:51:35
+Méthode: Tests statistiques (Kolmogorov-Smirnov + Mann-Whitney)
+
+DONNÉES:
+- Référence (train): 2000 échantillons
+- Production (test): 2000 échantillons
+- Features: 10
+
+RÉSULTATS:
+- Features avec drift: 1/10 (10.0%)
+- Score global drift: 0.019
+- Niveau: DRIFT MINEUR
+- Risque modèle: FAIBLE
+
+DÉTAILS PAR FEATURE:
+EXT_SOURCE_1:
+  - Drift détecté: NON
+  - KS p-value: 0.818754
+  - MW p-value: 0.469879
+  - Changement moyen: 0.030 std
+  - Score drift: 0.016
+
+EXT_SOURCE_2:
+  - Drift détecté: NON
+  - KS p-value: 0.226242
+  - MW p-value: 0.381417
+  - Changement moyen: 0.024 std
+  - Score drift: 0.019
+
+EXT_SOURCE_3:
+  - Drift détecté: NON
+  - KS p-value: 0.665529
+  - MW p-value: 0.724675
+  - Changement moyen: 0.017 std
+  - Score drift: 0.006
+
+AMT_CREDIT:
+  - Drift détecté: NON
+  - KS p-value: 0.329168
+  - MW p-value: 0.168771
+  - Changement moyen: 0.020 std
+  - Score drift: 0.016
+
+AMT_ANNUITY:
+  - Drift détecté: NON
+  - KS p-value: 0.841636
+  - MW p-value: 0.566791
+  - Changement moyen: 0.021 std
+  - Score drift: 0.009
+
+AMT_GOODS_PRICE:
+  - Drift détecté: NON
+  - KS p-value: 0.413232
+  - MW p-value: 0.197580
+  - Changement moyen: 0.014 std
+  - Score drift: 0.011
+
+DAYS_BIRTH:
+  - Drift détecté: NON
+  - KS p-value: 0.585821
+  - MW p-value: 0.433252
+  - Changement moyen: 0.027 std
+  - Score drift: 0.016
+
+AMT_INCOME_TOTAL:
+  - Drift détecté: NON
+  - KS p-value: 0.508600
+  - MW p-value: 0.243910
+  - Changement moyen: 0.032 std
+  - Score drift: 0.024
+
+NAME_CONTRACT_TYPE:
+  - Drift détecté: NON
+  - KS p-value: 1.000000
+  - MW p-value: 0.787254
+  - Changement moyen: 0.008 std
+  - Score drift: 0.002
+
+CODE_GENDER:
+  - Drift détecté: OUI
+  - KS p-value: 0.211740
+  - MW p-value: 0.024145
+  - Changement moyen: 0.070 std
+  - Score drift: 0.069
+
+CONCLUSION:
+Drift mineur détecté. Surveillance recommandée.
