@@ -1,6 +1,6 @@
 ANALYSE DATA DRIFT - PROJET PRÊT À DÉPENSER
 ==================================================
-Date: 2025-09-25 09:51:35
+Date: 2025-09-26 16:27:11
 Méthode: Tests statistiques (Kolmogorov-Smirnov + Mann-Whitney)
 
 DONNÉES:

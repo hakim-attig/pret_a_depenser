@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analyse Data Drift - Projet 7</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .header { background: #2E86AB; color: white; padding: 20px; }
+        .summary { background: #f0f0f0; padding: 15px; margin: 20px 0; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+        th { background: #f2f2f2; }
+        .drift { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Analyse Data Drift - Scoring Crédit</h1>
+        <p>Date: 2025-10-03 13:11:07</p>
+    </div>
+    
+    <div class="summary">
+        <h2>Résumé</h2>
+        <ul>
+            <li>Features analysées: 9</li>
+            <li>Features avec drift: 0 (0.0%)</li>
+            <li>Niveau: AUCUN DRIFT</li>
+            <li>Risque: FAIBLE</li>
+        </ul>
+    </div>
+    
+    <h2>Détails par Feature</h2>
+    <table>
+        <tr>
+            <th>Feature</th>
+            <th>Drift Détecté</th>
+            <th>KS p-value</th>
+            <th>Changement</th>
+        </tr>
+
+        <tr class="">
+            <td>EXT_SOURCE_2</td>
+            <td>NON</td>
+            <td>0.2262</td>
+            <td>0.024</td>
+        </tr>
+    
+        <tr class="">
+            <td>EXT_SOURCE_3</td>
+            <td>NON</td>
+            <td>0.6655</td>
+            <td>0.017</td>
+        </tr>
+    
+        <tr class="">
+            <td>EXT_SOURCE_1</td>
+            <td>NON</td>
+            <td>0.8188</td>
+            <td>0.030</td>
+        </tr>
+    
+        <tr class="">
+            <td>CODE_GENDER</td>
+            <td>NON</td>
+            <td>0.2117</td>
+            <td>0.070</td>
+        </tr>
+    
+        <tr class="">
+            <td>AMT_GOODS_PRICE</td>
+            <td>NON</td>
+            <td>0.4132</td>
+            <td>0.014</td>
+        </tr>
+    
+        <tr class="">
+            <td>AMT_CREDIT</td>
+            <td>NON</td>
+            <td>0.3292</td>
+            <td>0.020</td>
+        </tr>
+    
+        <tr class="">
+            <td>AMT_ANNUITY</td>
+            <td>NON</td>
+            <td>0.8416</td>
+            <td>0.021</td>
+        </tr>
+    
+        <tr class="">
+            <td>DAYS_BIRTH</td>
+            <td>NON</td>
+            <td>0.5858</td>
+            <td>0.027</td>
+        </tr>
+    
+        <tr class="">
+            <td>AMT_INCOME_TOTAL</td>
+            <td>NON</td>
+            <td>0.5086</td>
+            <td>0.032</td>
+        </tr>
+    
+    </table>
+    
+    <h2>Recommandations</h2>
+    <div class="summary">
+<p>✅ Modèle stable - Surveillance standard</p>
+    </div>
+</body>
+</html>
