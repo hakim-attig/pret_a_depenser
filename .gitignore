@@ -51,3 +51,12 @@ data/*.csv
 
 # Cache
 .pytest_cache/
+
+# Gros CSV déjà suivis
+*.csv
+
+# Modèles ML
+*.pkl
+
+# Base de données MLflow
+*.db
