@@ -12,7 +12,6 @@ st.set_page_config(
 
 API_URL = "http://localhost:8000"
 
-# Vérifier connexion API
 try:
     response = requests.get(f"{API_URL}/status", timeout=2)
     api_status = response.json()
@@ -20,54 +19,63 @@ try:
 except:
     api_ok = False
 
-# En-tête
 st.title("💳 Dashboard Scoring Crédit - Prêt à Dépenser")
 
 if not api_ok:
-    st.error("⚠️ API non accessible")
+    st.error("⚠️ API non accessible. Lancez l'API avec: uvicorn main:app --reload")
     st.stop()
 
-# Informations modèle
 try:
     model_info = requests.get(f"{API_URL}/model/info").json()
     st.success(f"✓ Modèle: {model_info['model_type'].upper()} | AUC: {model_info['auc_score']:.4f} | Coût: {model_info['optimal_cost']:,}€ | Seuil: {model_info['optimal_threshold']:.1%}")
 except:
     st.warning("Impossible de charger les infos du modèle")
 
-# SIDEBAR - Saisie SK_ID_CURR
+@st.cache_data
+def load_test_data():
+    try:
+        df = pd.read_csv("../all_clients_test.csv")
+        return df
+    except Exception as e:
+        st.error(f"Erreur chargement données: {e}")
+        return None
+
+test_clients = load_test_data()
+
+if test_clients is None:
+    st.error("Impossible de charger all_clients_test.csv")
+    st.stop()
+
 st.sidebar.header("🔍 Recherche Client")
 
-selected_client_id = st.sidebar.number_input(
-    "SK_ID_CURR",
-    min_value=100000,
-    max_value=500000,
-    value=396899,
-    step=1,
-    help="Exemples: 396899, 322041, 220127, 251531"
+client_ids = sorted(test_clients['SK_ID_CURR'].unique())
+selected_client_id = st.sidebar.selectbox(
+    "Choisir un client (SK_ID_CURR)",
+    options=client_ids,
+    index=0
 )
 
-st.sidebar.markdown("**Exemples de clients :**")
-st.sidebar.markdown("- 396899 (faible risque)")
-st.sidebar.markdown("- 322041 (faible risque)")
-st.sidebar.markdown("- 345558 (risque élevé)")
+st.sidebar.markdown(f"**{len(client_ids)} clients disponibles dans le test set**")
 
-# Bouton analyser
 if st.sidebar.button("📊 Analyser", type="primary", use_container_width=True):
     with st.spinner("Analyse en cours..."):
         try:
-            # Prédiction
+            client_row = test_clients[test_clients['SK_ID_CURR'] == selected_client_id].iloc[0]
+            
+            features_to_drop = ['SK_ID_CURR', 'RISK_SCORE', 'DECISION', 'REAL_TARGET']
+            features = client_row.drop(features_to_drop).values.tolist()
+            
             response = requests.post(
                 f"{API_URL}/predict",
-                json={"client_id": selected_client_id},
+                json={"features": features},
                 timeout=5
             )
             
             if response.status_code == 200:
                 result = response.json()
                 
-                st.header(f"Client SK_ID_CURR: {result['client_id']}")
+                st.header(f"Client SK_ID_CURR: {selected_client_id}")
                 
-                # Métriques
                 col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
@@ -83,15 +91,17 @@ if st.sidebar.button("📊 Analyser", type="primary", use_container_width=True):
                     st.metric("Seuil du Modèle", f"{result['threshold']:.1%}")
                 
                 with col4:
-                    real = result['real_label']
-                    st.metric("Réalité", real)
+                    real_target = int(client_row['REAL_TARGET'])
+                    real_label = "Défaut" if real_target == 1 else "Bon"
+                    st.metric("Réalité", real_label)
                 
-                if not result['prediction_correct']:
+                is_correct = (decision == "ACCORD" and real_target == 0) or (decision == "REFUS" and real_target == 1)
+                
+                if not is_correct:
                     st.warning("⚠️ Prédiction incorrecte")
                 else:
                     st.success("✓ Prédiction correcte")
                 
-                # Jauge
                 st.subheader("📊 Niveau de Risque")
                 fig = go.Figure(go.Indicator(
                     mode="gauge+number",
@@ -114,9 +124,8 @@ if st.sidebar.button("📊 Analyser", type="primary", use_container_width=True):
                 fig.update_layout(height=300)
                 st.plotly_chart(fig, use_container_width=True)
                 
-                # SHAP
-                st.subheader("🧠 Explication (Top 10 Features)")
-                explain_resp = requests.get(f"{API_URL}/explain/{selected_client_id}", timeout=10)
+                st.subheader("🔍 Facteurs de Décision (SHAP)")
+                explain_resp = requests.post(f"{API_URL}/explain", json={"features": features}, timeout=10)
                 
                 if explain_resp.status_code == 200:
                     explanation = explain_resp.json()
@@ -130,7 +139,7 @@ if st.sidebar.button("📊 Analyser", type="primary", use_container_width=True):
                         color="direction",
                         color_discrete_map={"AUGMENTE LE RISQUE": "red", "DIMINUE LE RISQUE": "green"},
                         labels={"impact": "Impact SHAP", "feature": "Variable"},
-                        title="Facteurs influençant la décision"
+                        title="Top 10 Facteurs Influençant la Décision"
                     )
                     fig_shap.update_layout(height=500, yaxis=dict(autorange="reversed"))
                     st.plotly_chart(fig_shap, use_container_width=True)
@@ -139,7 +148,6 @@ if st.sidebar.button("📊 Analyser", type="primary", use_container_width=True):
                 else:
                     st.warning("Explication SHAP non disponible")
                 
-                # Interprétation
                 st.subheader("💡 Interprétation")
                 if decision == "ACCORD":
                     st.success(f"""
@@ -150,17 +158,15 @@ if st.sidebar.button("📊 Analyser", type="primary", use_container_width=True):
                 else:
                     st.error(f"""
                     **Crédit Refusé**
-                    - Risque: {risk:.2%} > Seuil: {result['threshold']:.1%}
+                    - Risque: {risk:.2%} ≥ Seuil: {result['threshold']:.1%}
                     - Profil à risque trop élevé
                     """)
                     
-            elif response.status_code == 404:
-                st.error(f"Client SK_ID_CURR {selected_client_id} non trouvé dans la base")
             else:
-                st.error(f"Erreur API : {response.status_code}")
+                st.error(f"Erreur API : {response.status_code} - {response.text}")
                 
         except Exception as e:
             st.error(f"Erreur : {str(e)}")
 
 st.markdown("---")
-st.markdown("**Projet 7 - OpenClassrooms** | Modèle XGBoost Champion")
+st.markdown("**Projet 7 - OpenClassrooms** | Modèle LightGBM Champion | Test Set")
